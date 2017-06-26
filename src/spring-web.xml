@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+  http://www.springframework.org/schema/beans
+  http://www.springframework.org/schema/beans/spring-beans.xsd
+  http://www.springframework.org/schema/util
+  http://www.springframework.org/schema/util/spring-util.xsd
+  http://www.springframework.org/schema/context 
+  http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/mvc
+  http://www.springframework.org/schema/mvc/spring-mvc.xsd
+  http://www.springframework.org/schema/tx 
+  http://www.springframework.org/schema/tx/spring-tx-4.1.xsd
+  ">
+	<!-- 注解驱动，jackson要用到 -->
+	<mvc:annotation-driven />
+	<!-- 扫描包 -->
+	<context:component-scan base-package="com.mashensoft" />
+	<mvc:resources mapping="/**" location="/" />
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/"></property>
+		<property name="suffix" value=".jsp"></property>
+		<property name="contentType" value="text/html;charset=utf-8"></property>
+	</bean>
+	<beans>
+		<!-- <bean id="appProperty" -->
+		<!-- class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"> -->
+		<!-- <property name="locations"> -->
+		<!-- <array> -->
+		<!-- <value>classpath:jdbc.properties</value> -->
+		<!-- </array> -->
+		<!-- </property> -->
+		<!-- </bean> -->
+		<!-- 配置数据源 -->
+		<!-- <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" -->
+		<!-- destroy-method="close" -->
+		<!-- p:driverClassName="com.mysql.jdbc.Driver" -->
+		<!-- p:url="jdbc:mysql://localhost:3306/mashen" -->
+		<!-- p:username="root" -->
+		<!-- p:password="123" /> -->
+		<bean id="appProperty"
+			class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+			<property name="locations">
+				<array>
+					<value>classpath:jdbc.properties</value>
+				</array>
+			</property>
+		</bean>
+		<bean id="prop"
+			class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+			<property name="locations">
+				<array>
+					<value>classpath:jdbc.properties</value>
+				</array>
+			</property>
+		</bean>
+		<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+			destroy-method="close" p:driverClassName="com.mysql.jdbc.Driver"
+			p:url="jdbc:mysql://localhost:3306/mashen" p:username="root"
+			p:password="123" />
+		<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+			<property name="dataSource" ref="dataSource"></property>
+		</bean>
+		<bean id="sessionFactory"
+			class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+			<property name="dataSource">
+				<ref bean="dataSource" />
+			</property>
+			<property name="hibernateProperties">
+				<props>
+					<!-- MySQL的方言 -->
+					<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+					<prop key="javax.persistence.validation.mode">none</prop>
+					<!-- 必要时在数据库新建所有表格 -->
+					<!-- <prop key="hibernate.hbm2ddl.auto">update</prop> -->
+					<prop key="hibernate.show_sql">true</prop>
+					<!-- 配置current session的上下文环境，方便我们调用sessionFactory获取当前线程统一个session对象 -->
+					<prop key="current_session_context_class">thread</prop>
+					<!-- 用更漂亮的格式显示sql语句 -->
+				</props>
+			</property>
+			<property name="packagesToScan" value="com.mashensoft.model" />
+		</bean>
+		<bean id="txManager"
+			class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+			<property name="dataSource" ref="dataSource" />
+		</bean>
+
+		<tx:annotation-driven transaction-manager="txManager" />
+	</beans>
+
+</beans>
