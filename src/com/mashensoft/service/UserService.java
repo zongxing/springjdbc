@@ -31,7 +31,7 @@ public class UserService implements IUserService {
 	public List<User> getUser() {
 		List<Map<String, Object>> users = userDao.getUsers();
 		System.out.println(users.size());
-		return null;
+		return users;
 	}
 	
 }
